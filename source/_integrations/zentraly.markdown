@@ -125,7 +125,7 @@ Changing the target temperature puts the device into manual mode. If a `climate.
 
 For the thermostats, Away displays the target temperature reported by the thermostat. Their separate **Away temperature** configuration control sets the value used by the device. Changing that control does not itself activate Away.
 
-ZTREA instead provides a separate Away temperature reading to the climate entity, which displays it while Away is active. It does not expose the thermostat configuration controls listed below.
+ZTREA follows the same Away behavior: its climate entity displays the effective target reported by the device. It does not expose the thermostat configuration controls listed below.
 
 All climate models provide **Child lock** and **Reset device**. ZTTIN, ZTTWZ, ZTMWZ, and ZTREA provide **Always-on display**. ZTTWZ, ZTMWZ, and ZTREA expose Wi-Fi signal power when connected directly. ZTTZB and ZTAAI provide a separate battery sensor with a percentage from 0 to 100; battery is not an attribute of the climate entity.
 
@@ -236,11 +236,11 @@ automation: |
 
 Zentraly receives state reports over a local WebSocket connection. Reports update the fields they contain without clearing unrelated fields.
 
-For eleven models, the integration also reads entity state every five minutes as a synchronization fallback. Periodic state and firmware/hardware version reads are disabled for ZTTZB, ZTAAI, ZTHZB, ZTHG2, and ZTAAK. Initial reads, reads after reconnection, explicit reads, reads following actions, writes, reports, and the gateway connection keepalive remain available. Each child uses its own model's policy, independently of its parent. ZTBIN RSSI is updated only through reports.
+For eleven models, the integration also reads entity state every five minutes as a synchronization fallback. Periodic state reads are disabled for ZTTZB, ZTAAI, ZTHZB, ZTHG2, and ZTAAK. Home Assistant manages polling and respects the integration entry's setting to disable polling. Initial reads, reads after reconnection, explicit reads, reads following actions, writes, reports, and the gateway connection keepalive remain available. Each child uses its own model's policy, independently of its parent. ZTBIN RSSI is updated only through reports.
 
 A parent and its children share a connection. Updates are routed to the corresponding device and endpoint, including each ZTIKD channel. If the parent connection is lost, its devices become unavailable while the integration reconnects. A child that stops responding can become unavailable without affecting a responding sibling or parent.
 
-Firmware and hardware versions are refreshed every 24 hours for models with periodic polling enabled. A failed version reading preserves the last known value. Discovery of a changed IP address or port reloads the configured connection.
+Firmware and hardware versions are read when a device loads and after reconnection. Each supported device, including child devices and gateways, provides a diagnostic **Refresh device information** button to read these versions manually. There is no periodic version check. An incomplete manual reading identifies whether firmware, hardware, or both could not be read, preserves known values, and saves any version received. Failed automatic readings do not prevent device setup or reconnection. The **Home Assistant Core Integration: Update entity** action refreshes entity state, not versions. Discovery of a changed IP address or port reloads the configured connection.
 
 For models that support both direct and child connections, the Wi-Fi signal entity is created only for a direct connection. When the device is configured as a child, the integration removes any existing Wi-Fi signal entity for that child and does not send Wi-Fi signal reads. Electrical power and other supported radio measurements remain available.
 
